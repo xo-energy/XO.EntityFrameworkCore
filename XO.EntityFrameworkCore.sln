@@ -5,6 +5,13 @@ VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions", "XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions\XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions.csproj", "{504FD595-ABC7-480A-98F7-9FA9BDD9A2F0}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6460FB90-F155-49F4-9A89-6A23C9C104EF}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		version.json = version.json
+		.github\workflows\XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions.yml = .github\workflows\XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

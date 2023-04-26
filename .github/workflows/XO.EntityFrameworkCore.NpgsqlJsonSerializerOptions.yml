@@ -1,0 +1,40 @@
+name: XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions
+on:
+  pull_request:
+    types: [opened, synchronize]
+  push:
+    branches:
+      - 'main'
+      - 'release-*'
+
+jobs:
+  nuget:
+    name: NuGet
+    runs-on: ubuntu-latest
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_MULTILEVEL_LOOKUP: 1
+      DOTNET_NOLOGO: 1
+      NUGET_SOURCE: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+      PROJECT: XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions
+    steps:
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0.x'
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # fetch full history for NBGV
+      - uses: dotnet/nbgv@master
+        id: nbgv
+        with:
+          path: ${{ env.PROJECT }}
+
+      - run: dotnet restore "$PROJECT"
+      - run: dotnet build --no-restore -c Release "$PROJECT"
+      - run: dotnet pack --no-build -o packages -c Release "$PROJECT"
+      - run: dotnet nuget push -k "${{ github.token }}" -s "$NUGET_SOURCE" "packages/$PROJECT.${{ steps.nbgv.outputs.NuGetPackageVersion }}.nupkg"
+
+      # publish release builds to nuget.org!
+      - run: dotnet nuget push -k "${{ secrets.NUGET_API_KEY }}" -s "https://api.nuget.org/v3/index.json" "packages/$PROJECT.${{ steps.nbgv.outputs.NuGetPackageVersion }}.nupkg"
+        if: startsWith(github.ref, 'refs/heads/release-')
