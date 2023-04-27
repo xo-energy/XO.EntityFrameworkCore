@@ -48,8 +48,20 @@ public sealed class JsonSerializerOptionsConvention : IModelFinalizingConvention
 
     private void Configure<TProperty>(IConventionProperty property)
     {
-        property.Builder.SetJsonSerializerValueConverter<TProperty>(
-            _jsonSerializerOptionsProvider.DefaultJsonSerializerOptions,
-            _jsonSerializerOptionsProvider.UseJsonSerializerValueComparer);
+        // the calling method checked for null
+        var options = _jsonSerializerOptionsProvider.DefaultJsonSerializerOptions!;
+
+        var converter = new JsonSerializerValueConverter<TProperty>(options);
+        var comparer = _jsonSerializerOptionsProvider.UseJsonSerializerValueComparer ? new JsonSerializerValueComparer<TProperty>(options) : null;
+
+        if (property.Builder.CanSetConversion(converter))
+        {
+            property.SetValueConverter(converter);
+        }
+
+        if (property.Builder.CanSetValueComparer(comparer))
+        {
+            property.SetValueComparer(comparer);
+        }
     }
 }
