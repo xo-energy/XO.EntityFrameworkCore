@@ -30,7 +30,7 @@ jobs:
         with:
           path: ${{ env.PROJECT }}
 
-      - run: dotnet restore "$PROJECT"
+      - run: dotnet restore --locked-mode "$PROJECT"
       - run: dotnet build --no-restore -c Release "$PROJECT"
       - run: dotnet pack --no-build -o packages -c Release "$PROJECT"
       - run: dotnet nuget push -k "${{ github.token }}" -s "$NUGET_SOURCE" "packages/$PROJECT.${{ steps.nbgv.outputs.NuGetPackageVersion }}.nupkg"
