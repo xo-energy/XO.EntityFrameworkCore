@@ -1,0 +1,58 @@
+name: CI
+on:
+  pull_request:
+    types: [opened, synchronize]
+  push:
+    branches:
+      - 'main'
+      - 'release-*'
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_MULTILEVEL_LOOKUP: 1
+  DOTNET_NOLOGO: 1
+  NUGET_SOURCE: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+jobs:
+  test:
+    strategy:
+      matrix:
+        dotnet-version: ['6.0.x', '7.0.x']
+        include:
+          - dotnet-version: '6.0.x'
+            framework: 'net6.0'
+          - dotnet-version: '7.0.x'
+            framework: 'net7.0'
+    name: test / ${{ matrix.framework }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+
+      - uses: actions/checkout@v3
+
+      - run: dotnet restore --locked-mode -f ${{ matrix.framework }}
+      - run: dotnet test --no-restore -c Release -f ${{ matrix.framework }} --verbosity normal
+  build:
+    runs-on: ubuntu-latest
+    env:
+      NUGET_SOURCE: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+    needs: test
+    steps:
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0.x'
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # fetch full history for NBGV
+      - uses: dotnet/nbgv@master
+        id: nbgv
+
+      - run: dotnet restore --locked-mode
+      - run: dotnet pack --no-restore -o packages -c Release XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions
+      - run: dotnet nuget push -k "${{ github.token }}" -s "$NUGET_SOURCE" "packages/*.nupkg"
+
+      # publish release builds to nuget.org!
+      - run: dotnet nuget push -k "${{ secrets.NUGET_API_KEY }}" -s "https://api.nuget.org/v3/index.json" "packages/*.nupkg"
+        if: startsWith(github.ref, 'refs/heads/release-')
