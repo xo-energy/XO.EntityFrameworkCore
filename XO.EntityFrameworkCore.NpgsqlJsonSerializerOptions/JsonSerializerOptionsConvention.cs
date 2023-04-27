@@ -54,12 +54,13 @@ public sealed class JsonSerializerOptionsConvention : IModelFinalizingConvention
         var converter = new JsonSerializerValueConverter<TProperty>(options);
         var comparer = _jsonSerializerOptionsProvider.UseJsonSerializerValueComparer ? new JsonSerializerValueComparer<TProperty>(options) : null;
 
-        if (property.Builder.CanSetConversion(converter))
+        var canSetConversion = property.Builder.CanSetConversion(converter);
+        if (canSetConversion)
         {
             property.SetValueConverter(converter);
         }
 
-        if (property.Builder.CanSetValueComparer(comparer))
+        if (canSetConversion && property.Builder.CanSetValueComparer(comparer))
         {
             property.SetValueComparer(comparer);
         }
