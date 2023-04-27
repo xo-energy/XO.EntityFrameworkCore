@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.github\workflows\XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions.yml = .github\workflows\XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions.yml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XO.EntityFrameworkCore.Tests", "XO.EntityFrameworkCore.Tests\XO.EntityFrameworkCore.Tests.csproj", "{982C721F-B0D4-49BA-B1FC-2EE7CE0704D6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,6 +24,10 @@ Global
 		{504FD595-ABC7-480A-98F7-9FA9BDD9A2F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{504FD595-ABC7-480A-98F7-9FA9BDD9A2F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{504FD595-ABC7-480A-98F7-9FA9BDD9A2F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{982C721F-B0D4-49BA-B1FC-2EE7CE0704D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{982C721F-B0D4-49BA-B1FC-2EE7CE0704D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{982C721F-B0D4-49BA-B1FC-2EE7CE0704D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{982C721F-B0D4-49BA-B1FC-2EE7CE0704D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
