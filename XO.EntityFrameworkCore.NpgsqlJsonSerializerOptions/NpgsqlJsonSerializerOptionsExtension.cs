@@ -53,8 +53,7 @@ public sealed class NpgsqlJsonSerializerOptionsExtension : IDbContextOptionsExte
             ;
 
         // not an efcore-defined service, so add it directly to the service collection
-        services.Replace(
-            ServiceDescriptor.Singleton<IJsonSerializerOptionsProvider>(_jsonSerializerOptionsProvider));
+        services.TryAddSingleton<IJsonSerializerOptionsProvider>(_jsonSerializerOptionsProvider);
     }
 
     /// <summary>
@@ -67,6 +66,16 @@ public sealed class NpgsqlJsonSerializerOptionsExtension : IDbContextOptionsExte
 
     private sealed class ExtensionInfo : DbContextOptionsExtensionInfo
     {
+        private static readonly JsonSerializerOptions _debugOptions = new()
+        {
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault,
+            WriteIndented = false,
+        };
+        private static readonly JsonSerializerOptions _debugOptionsIndented = new(_debugOptions)
+        {
+            WriteIndented = true,
+        };
+
         private readonly NpgsqlJsonSerializerOptionsExtension _extension;
 
         public ExtensionInfo(NpgsqlJsonSerializerOptionsExtension extension)
@@ -79,17 +88,33 @@ public sealed class NpgsqlJsonSerializerOptionsExtension : IDbContextOptionsExte
             => false;
 
         public override string LogFragment
-            => nameof(NpgsqlJsonSerializerOptions);
+            => $"{nameof(NpgsqlJsonSerializerOptions)} {nameof(_extension.DefaultJsonSerializerOptions)}={JsonSerializer.Serialize(_extension.DefaultJsonSerializerOptions, _debugOptions)} {nameof(_extension.UseJsonSerializerValueComparer)}={_extension.UseJsonSerializerValueComparer}";
 
         public override int GetServiceProviderHashCode()
-            => default;
+            => HashCode.Combine(_extension.DefaultJsonSerializerOptions, _extension.UseJsonSerializerValueComparer);
 
         public override void PopulateDebugInfo(IDictionary<string, string> debugInfo)
         {
-            // could include individual option values here and in 'LogFragment' if you wanted to be thorough
+            debugInfo.Add(
+                $"{nameof(NpgsqlJsonSerializerOptions)}:{nameof(_extension.DefaultJsonSerializerOptions)}",
+                JsonSerializer.Serialize(_extension.DefaultJsonSerializerOptions, _debugOptionsIndented));
+            debugInfo.Add(
+                $"{nameof(NpgsqlJsonSerializerOptions)}:{nameof(_extension.UseJsonSerializerValueComparer)}",
+                _extension.UseJsonSerializerValueComparer.ToString());
         }
 
         public override bool ShouldUseSameServiceProvider(DbContextOptionsExtensionInfo other)
-            => true;
+        {
+            if (other.Extension is not NpgsqlJsonSerializerOptionsExtension otherExtension)
+                return false;
+
+            if (!Object.Equals(_extension.DefaultJsonSerializerOptions, otherExtension.DefaultJsonSerializerOptions))
+                return false;
+
+            if (_extension.UseJsonSerializerValueComparer != otherExtension.UseJsonSerializerValueComparer)
+                return false;
+
+            return true;
+        }
     }
 }
