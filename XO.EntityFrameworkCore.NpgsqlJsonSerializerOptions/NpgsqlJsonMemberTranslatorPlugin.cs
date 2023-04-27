@@ -22,9 +22,19 @@ public sealed class NpgsqlJsonMemberTranslatorPlugin : IMemberTranslatorPlugin
         ISqlExpressionFactory sqlExpressionFactory,
         IModel model)
     {
-        Translators = new IMemberTranslator[] {
-            new NpgsqlJsonMemberTranslator(typeMappingSource, (NpgsqlSqlExpressionFactory)sqlExpressionFactory, model),
-        };
+        var translators = new List<IMemberTranslator>(1);
+
+        if (sqlExpressionFactory is NpgsqlSqlExpressionFactory npgsqlSqlExpressionFactory)
+        {
+            var npgsqlJsonMemberTranslator = new NpgsqlJsonMemberTranslator(
+                typeMappingSource,
+                npgsqlSqlExpressionFactory,
+                model);
+
+            translators.Add(npgsqlJsonMemberTranslator);
+        }
+
+        this.Translators = translators;
     }
 
     /// <inheritdoc/>
