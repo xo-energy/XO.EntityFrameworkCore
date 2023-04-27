@@ -30,6 +30,8 @@ jobs:
           dotnet-version: ${{ matrix.dotnet-version }}
 
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # fetch full history for NBGV
 
       - run: dotnet restore --locked-mode XO.EntityFrameworkCore.Tests
       - run: dotnet build --no-restore -c Release -f ${{ matrix.framework }} XO.EntityFrameworkCore.Tests
