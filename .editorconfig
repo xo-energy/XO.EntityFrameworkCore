@@ -1,0 +1,41 @@
+root = true
+
+[*]
+charset = utf-8
+indent_size = 2
+indent_style = space
+insert_final_newline = true
+max_line_length = 120
+trim_trailing_whitespace = true
+
+[*.cs]
+indent_size = 4
+
+# style
+csharp_prefer_braces = when_multiline
+csharp_preserve_single_line_blocks = true
+csharp_style_namespace_declarations = file_scoped
+dotnet_sort_system_directives_first = true
+
+# style - experimental
+csharp_style_allow_blank_lines_between_consecutive_braces_experimental = false
+dotnet_style_allow_multiple_blank_lines_experimental = false
+dotnet_style_allow_statement_immediately_after_block_experimental = false
+
+# IDE2000: Allow multiple blank lines
+dotnet_diagnostic.IDE2000.severity = warning
+
+# IDE2002: Allow blank lines between consecutive braces
+dotnet_diagnostic.IDE2002.severity = warning
+
+# CA1825: Avoid zero-length array allocations
+dotnet_diagnostic.CA1825.severity = warning
+
+# CA2007: Consider calling ConfigureAwait on the awaited task
+dotnet_diagnostic.CA2007.severity = warning
+
+# CA2016: Forward the 'CancellationToken' parameter to methods
+dotnet_diagnostic.CA2016.severity = warning
+
+[.git/*]
+max_line_length = unset
