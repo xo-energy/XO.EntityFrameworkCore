@@ -40,7 +40,7 @@ public sealed class JsonSerializerOptionsConvention : IModelFinalizingConvention
                     continue;
 
                 _configureMethodInfo.MakeGenericMethod(property.ClrType)
-                    .CreateDelegate<Action<IConventionProperty>>()
+                    .CreateDelegate<Action<IConventionProperty>>(this)
                     .Invoke(property);
             }
         }
