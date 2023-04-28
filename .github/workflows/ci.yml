@@ -54,7 +54,9 @@ jobs:
           -c Release
           -f ${{ matrix.framework }}
           --logger GitHubActions
+          --collect:"XPlat Code Coverage;Format=opencover"
           XO.EntityFrameworkCore.Tests
+      - uses: codecov/codecov-action@v3
 
   build:
     runs-on: ubuntu-latest
