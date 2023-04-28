@@ -45,7 +45,7 @@ jobs:
           dotnet test --no-build
           -c Release
           -f ${{ matrix.framework }}
-          --verbosity normal
+          --logger GitHubActions
           XO.EntityFrameworkCore.Tests
 
   build:
