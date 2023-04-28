@@ -24,6 +24,14 @@ jobs:
             framework: 'net7.0'
     name: test / ${{ matrix.framework }}
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
     steps:
       - uses: actions/setup-dotnet@v3
         with:
