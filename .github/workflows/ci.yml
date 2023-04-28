@@ -24,6 +24,14 @@ jobs:
             framework: 'net7.0'
     name: test / ${{ matrix.framework }}
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
     steps:
       - uses: actions/setup-dotnet@v3
         with:
@@ -33,9 +41,21 @@ jobs:
         with:
           fetch-depth: 0 # fetch full history for NBGV
 
-      - run: dotnet restore --locked-mode XO.EntityFrameworkCore.Tests
-      - run: dotnet build --no-restore -c Release -f ${{ matrix.framework }} XO.EntityFrameworkCore.Tests
-      - run: dotnet test --no-build -c Release -f ${{ matrix.framework }} --verbosity normal
+      - run: >
+          dotnet restore --locked-mode
+          XO.EntityFrameworkCore.Tests
+      - run: >
+          dotnet build --no-restore
+          -c Release
+          -f ${{ matrix.framework }}
+          XO.EntityFrameworkCore.Tests
+      - run: >
+          dotnet test --no-build
+          -c Release
+          -f ${{ matrix.framework }}
+          --logger GitHubActions
+          XO.EntityFrameworkCore.Tests
+
   build:
     runs-on: ubuntu-latest
     env:
@@ -52,10 +72,24 @@ jobs:
       - uses: dotnet/nbgv@master
         id: nbgv
 
-      - run: dotnet restore --locked-mode XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions
-      - run: dotnet pack --no-restore -o packages -c Release XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions
-      - run: dotnet nuget push -k "${{ github.token }}" -s "$NUGET_SOURCE" "packages/*.nupkg"
+      - run: >
+          dotnet restore --locked-mode
+          XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions
+      - run: >
+          dotnet pack --no-restore
+          -o packages
+          -c Release
+          XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions
+      - run: >
+          dotnet nuget push
+          -k "${{ github.token }}"
+          -s "$NUGET_SOURCE"
+          "packages/*.nupkg"
 
       # publish release builds to nuget.org!
-      - run: dotnet nuget push -k "${{ secrets.NUGET_API_KEY }}" -s "https://api.nuget.org/v3/index.json" "packages/*.nupkg"
-        if: startsWith(github.ref, 'refs/heads/release-')
+      - if: startsWith(github.ref, 'refs/heads/release-')
+        run: >
+          dotnet nuget push
+          -k "${{ secrets.NUGET_API_KEY }}"
+          -s "https://api.nuget.org/v3/index.json"
+          "packages/*.nupkg"
