@@ -5,6 +5,6 @@
 
 Plugin(s?) for Entity Framework Core. See the package README for more information.
 
-| Package | Version | Description |       |
-| ------- | :-----: | ----------- | :---: |
-| **XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions** | [![NuGet](https://img.shields.io/nuget/v/XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions)](https://www.nuget.org/packages/XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions) | a plugin that adds support for `JsonSerializerOptions` to the Npgsql provider | [README](./XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions/) |
+- **[XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions](https://github.com/xo-energy/XO.EntityFrameworkCore/blob/main/XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions/README.md)** - a plugin that adds support for `JsonSerializerOptions` to the Npgsql provider
+
+  [![NuGet](https://img.shields.io/nuget/v/XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions)](https://www.nuget.org/packages/XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions)
