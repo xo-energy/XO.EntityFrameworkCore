@@ -7,8 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XO.EntityFrameworkCore.Npgs
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6460FB90-F155-49F4-9A89-6A23C9C104EF}"
 	ProjectSection(SolutionItems) = preProject
-		Directory.Build.props = Directory.Build.props
+		.editorconfig = .editorconfig
+		.git-blame-ignore-revs = .git-blame-ignore-revs
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
 		.github\workflows\ci.yml = .github\workflows\ci.yml
+		Directory.Build.props = Directory.Build.props
 		version.json = version.json
 	EndProjectSection
 EndProject
