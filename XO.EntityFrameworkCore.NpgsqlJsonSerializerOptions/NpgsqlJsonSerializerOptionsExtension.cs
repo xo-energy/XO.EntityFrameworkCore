@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Infrastructure;
 using Microsoft.EntityFrameworkCore.Query;
@@ -14,17 +14,19 @@ public sealed class NpgsqlJsonSerializerOptionsExtension : IDbContextOptionsExte
 {
     private readonly JsonSerializerOptionsProvider _jsonSerializerOptionsProvider;
 
+    private DbContextOptionsExtensionInfo? _info;
+
     /// <summary>
     /// Initializes a new instance of <see cref="NpgsqlJsonSerializerOptionsExtension"/>.
     /// </summary>
     public NpgsqlJsonSerializerOptionsExtension()
     {
-        Info = new ExtensionInfo(this);
         _jsonSerializerOptionsProvider = new JsonSerializerOptionsProvider();
     }
 
     /// <inheritdoc/>
-    public DbContextOptionsExtensionInfo Info { get; }
+    public DbContextOptionsExtensionInfo Info
+        => _info ??= new ExtensionInfo(this);
 
     /// <summary>
     /// Gets or sets the default <see cref="JsonSerializerOptions"/> to use when serializing JSON column values.
