@@ -1,6 +1,10 @@
+using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions;
 
@@ -102,6 +106,66 @@ public class JsonSerializerOptionsConventionTest
             },
             DefaultJsonSerializerOptions,
             true);
+    }
+
+    [Fact]
+    public void ShouldUseSameServiceProvider_ReturnsTrue()
+    {
+        var jsonSerializerOptions = new JsonSerializerOptions()
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        };
+
+        // uses a shared instance of JsonSerializerOptions
+        void Configure(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseNpgsqlJsonSerializerOptions(jsonSerializerOptions);
+        }
+
+        using var context1 = new TestContext(configureOptions: Configure);
+        using var context2 = new TestContext(configureOptions: Configure);
+
+        AssertServiceProvider(context1, context2, same: true);
+    }
+
+    [Fact]
+    public void ShouldUseSameServiceProvider_ReturnsFalse()
+    {
+        // a new instance of DbContextOptionsBuilder is created for each context!
+        static void Configure(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseNpgsqlJsonSerializerOptions(
+                new JsonSerializerOptions
+                {
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                });
+        }
+
+        using var context1 = new TestContext(configureOptions: Configure);
+        using var context2 = new TestContext(configureOptions: Configure);
+
+        AssertServiceProvider(context1, context2, same: false);
+    }
+
+    private static void AssertServiceProvider(DbContext context1, DbContext context2, bool same)
+    {
+        var scope1 = context1.GetService<IServiceProvider>();
+        var scope2 = context2.GetService<IServiceProvider>();
+
+        var property = scope1.GetType().GetProperty("RootProvider", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        var sp1 = property.GetValue(scope1);
+        var sp2 = property.GetValue(scope2);
+
+        if (same)
+        {
+            Assert.Same(sp2, sp1);
+        }
+        else
+        {
+            Assert.NotSame(sp2, sp1);
+        }
     }
 
     private static void AssertComparer(
