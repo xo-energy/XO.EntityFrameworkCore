@@ -8,14 +8,14 @@ An Entity Framework Core plugin that adds support for `JsonSerializerOptions` to
 
 ## Usage
 
-1. Call the extension method to add the plugin to your `DbContext`. Optionally, configure default `JsonSerializerOptions` to activate the plugin for all `json` and `jsonb` columns.
+1. Call the extension method to add the plugin to your `DbContext`.
 
     ```csharp
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder
             .UseNpgsql("Host=localhost")
-            .UseNpgsqlJsonSerializerOptions(defaultJsonSerializerOptions: null);
+            .UseNpgsqlJsonSerializerOptions();
     }
     ```
 
@@ -36,3 +36,40 @@ An Entity Framework Core plugin that adds support for `JsonSerializerOptions` to
         });
     }
     ```
+
+## Options
+
+### Default Serializer Options
+
+To apply default `JsonSerializerOptions` to all `json` and `jsonb` columns, pass the default instance to the options builder:
+
+> **Note:** When configuring the default serializer options, pass the **same instance** every time your configuration callback is invoked. Otherwise, Entity Framework will detect the options have changed and construct a new `IServiceProvider` for every `DbContext`!
+
+```csharp
+private static readonly JsonSerializerOptions defaultOptions
+    = new JsonSerializerOptions
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    };
+
+protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+{
+    optionsBuilder
+        .UseNpgsql("Host=localhost")
+        .UseNpgsqlJsonSerializerOptions(defaultOptions);
+}
+```
+
+### JsonSerializerValueComparer&lt;T&gt;
+
+By default, the plugin configures affected entity properties to use `JsonSerializerValueComparer<T>` for value equality comparison, which serializes each value to JSON and compares the resulting strings. If you prefer the default value comparer's semantics for your value type(s), or if you just don't want the additional serialization overhead, you can disable it:
+
+```csharp
+protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+{
+    optionsBuilder
+        .UseNpgsql("Host=localhost")
+        .UseNpgsqlJsonSerializerOptions(useJsonSerializerValueComparer: false);
+}
+```
