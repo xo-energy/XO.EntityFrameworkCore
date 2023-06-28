@@ -13,16 +13,7 @@ env:
   DOTNET_NOLOGO: 1
   NUGET_SOURCE: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
 jobs:
-  test:
-    strategy:
-      matrix:
-        dotnet-version: ['6.0.x', '7.0.x']
-        include:
-          - dotnet-version: '6.0.x'
-            framework: 'net6.0'
-          - dotnet-version: '7.0.x'
-            framework: 'net7.0'
-    name: test / ${{ matrix.framework }}
+  build:
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -33,65 +24,61 @@ jobs:
         ports:
           - 5432:5432
     steps:
-      - uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: ${{ matrix.dotnet-version }}
-
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # fetch full history for NBGV
-
-      - run: >
+      - name: Set up dotnet
+        uses: actions/setup-dotnet@v3
+      
+      - name: Run dotnet restore
+        run: >
           dotnet restore --locked-mode
-          XO.EntityFrameworkCore.Tests
-      - run: >
+          -bl:"reports/dotnet-restore.binlog"
+      - name: Run dotnet build
+        run: >
           dotnet build --no-restore
+          -bl:"reports/dotnet-build.binlog"
           -c Release
-          -f ${{ matrix.framework }}
-          XO.EntityFrameworkCore.Tests
-      - run: >
+      - name: Run dotnet test
+        run: >
           dotnet test --no-build
+          -bl:"reports/dotnet-test.binlog"
           -c Release
-          -f ${{ matrix.framework }}
-          --logger GitHubActions
-          --collect:"XPlat Code Coverage;Format=opencover"
-          XO.EntityFrameworkCore.Tests
+          --results-directory "reports"
+          --collect "XPlat Code Coverage"
+          --logger "GitHubActions"
+          --logger "trx;LogFilePrefix=${{ github.job }}"
+
       - uses: codecov/codecov-action@v3
-
-  build:
-    runs-on: ubuntu-latest
-    env:
-      NUGET_SOURCE: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
-    needs: test
-    steps:
-      - uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '7.0.x'
+          token: ${{ secrets.CODECOV_TOKEN }}
 
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 # fetch full history for NBGV
-      - uses: dotnet/nbgv@master
-        id: nbgv
-
-      - run: >
-          dotnet restore --locked-mode
-          XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions
-      - run: >
-          dotnet pack --no-restore
-          -o packages
+      - name: Run dotnet pack
+        run: >
+          dotnet pack --no-build
+          -bl:"reports/dotnet-pack.binlog"
           -c Release
-          XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions
-      - run: >
-          dotnet nuget push
+          -o ${{ runner.temp }}
+
+      - name: Push packages to GitHub Packages
+        run: >
+          dotnet nuget push ${{ runner.temp }}/*.nupkg
           -k "${{ github.token }}"
           -s "$NUGET_SOURCE"
-          "packages/*.nupkg"
+          --skip-duplicate
 
       # publish release builds to nuget.org!
-      - if: startsWith(github.ref, 'refs/heads/release-')
+      - name: Push packages to NuGet.org
+        if: startsWith(github.ref, 'refs/heads/release-')
         run: >
-          dotnet nuget push
+          dotnet nuget push ${{ runner.temp }}/*.nupkg
           -k "${{ secrets.NUGET_API_KEY }}"
           -s "https://api.nuget.org/v3/index.json"
-          "packages/*.nupkg"
+          --skip-duplicate
+
+      - name: Upload workflow artifact 'reports'
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: reports
+          path: reports/*

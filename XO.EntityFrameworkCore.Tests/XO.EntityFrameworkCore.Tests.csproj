@@ -2,12 +2,9 @@
 
   <PropertyGroup>
     <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <RootNamespace>XO.EntityFrameworkCore</RootNamespace>
 
     <IsPackable>false</IsPackable>
-    <RestorePackagesWithLockfile>true</RestorePackagesWithLockfile>
   </PropertyGroup>
 
   <ItemGroup>
