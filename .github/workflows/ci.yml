@@ -29,7 +29,7 @@ jobs:
           fetch-depth: 0 # fetch full history for NBGV
       - name: Set up dotnet
         uses: actions/setup-dotnet@v3
-      
+
       - name: Run dotnet restore
         run: >
           dotnet restore --locked-mode
@@ -61,6 +61,7 @@ jobs:
           -o ${{ runner.temp }}
 
       - name: Push packages to GitHub Packages
+        if: ${{ !startsWith(github.ref, 'refs/pull/') }}
         run: >
           dotnet nuget push ${{ runner.temp }}/*.nupkg
           -k "${{ github.token }}"
