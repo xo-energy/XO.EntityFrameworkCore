@@ -33,7 +33,7 @@ internal sealed class NpgsqlJsonMemberTranslator : NpgsqlJsonPocoTranslator
             case ColumnExpression columnExpression:
                 return TranslateJsonTypeMapping(instance, columnExpression, member, returnType);
 
-            case PostgresJsonTraversalExpression { Expression: ColumnExpression columnExpression }:
+            case PgJsonTraversalExpression { Expression: ColumnExpression columnExpression }:
                 return TranslateJsonTypeMapping(instance, columnExpression, member, returnType);
 
             default:
