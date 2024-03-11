@@ -1,7 +1,9 @@
-﻿using System.Text.Json;
+﻿using System.Data.Common;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql;
 
 namespace XO.EntityFrameworkCore;
 
@@ -9,24 +11,20 @@ internal sealed class TestContext : DbContext
 {
     private readonly Action<DbContextOptionsBuilder>? _configureOptions;
 
-    private static readonly object _databaseCreatedLock = new object();
-    private static bool _databaseCreated;
+    private static readonly DbDataSource _dataSource;
     private static int _nextId = 1;
 
     static TestContext()
     {
-        lock (_databaseCreatedLock)
-        {
-            if (_databaseCreated)
-                return;
+        _dataSource = new NpgsqlDataSourceBuilder(
+            "Host=localhost;Username=postgres;Password=password;Database=XO.EntityFrameworkCore.Tests;Include Error Detail=true")
+            .EnableDynamicJson()
+            .Build();
 
-            using var context = new TestContext();
+        using var context = new TestContext();
 
-            context.Database.EnsureDeleted();
-            context.Database.EnsureCreated();
-
-            _databaseCreated = true;
-        }
+        context.Database.EnsureDeleted();
+        context.Database.EnsureCreated();
     }
 
     public TestContext(
@@ -38,7 +36,7 @@ internal sealed class TestContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder
-            .UseNpgsql("Host=localhost;Username=postgres;Password=password;Database=XO.EntityFrameworkCore.Tests;Include Error Detail=true")
+            .UseNpgsql(_dataSource)
             .UseNpgsqlJsonSerializerOptions()
             ;
 
