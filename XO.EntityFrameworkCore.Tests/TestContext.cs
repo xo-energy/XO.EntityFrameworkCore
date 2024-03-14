@@ -1,7 +1,11 @@
-﻿using System.Text.Json;
+﻿using System.Data.Common;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
+using Microsoft.EntityFrameworkCore.Query;
+using Npgsql;
+using XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions;
 
 namespace XO.EntityFrameworkCore;
 
@@ -9,24 +13,23 @@ internal sealed class TestContext : DbContext
 {
     private readonly Action<DbContextOptionsBuilder>? _configureOptions;
 
-    private static readonly object _databaseCreatedLock = new object();
-    private static bool _databaseCreated;
+    private static readonly DbDataSource _dataSource;
     private static int _nextId = 1;
+
+    private NpgsqlJsonMemberTranslatorPlugin? _plugin;
+    private NpgsqlJsonMemberTranslator? _translator;
 
     static TestContext()
     {
-        lock (_databaseCreatedLock)
-        {
-            if (_databaseCreated)
-                return;
+        _dataSource = new NpgsqlDataSourceBuilder(
+            "Host=localhost;Username=postgres;Password=password;Database=XO.EntityFrameworkCore.Tests;Include Error Detail=true")
+            .EnableDynamicJson()
+            .Build();
 
-            using var context = new TestContext();
+        using var context = new TestContext();
 
-            context.Database.EnsureDeleted();
-            context.Database.EnsureCreated();
-
-            _databaseCreated = true;
-        }
+        context.Database.EnsureDeleted();
+        context.Database.EnsureCreated();
     }
 
     public TestContext(
@@ -38,7 +41,7 @@ internal sealed class TestContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder
-            .UseNpgsql("Host=localhost;Username=postgres;Password=password;Database=XO.EntityFrameworkCore.Tests;Include Error Detail=true")
+            .UseNpgsql(_dataSource)
             .UseNpgsqlJsonSerializerOptions()
             ;
 
@@ -68,6 +71,17 @@ internal sealed class TestContext : DbContext
                 ;
         });
     }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "EF1001:Internal EF Core API usage.", Justification = "Test")]
+    public NpgsqlJsonMemberTranslatorPlugin GetPlugin()
+        => _plugin ??= InfrastructureExtensions.GetService<IEnumerable<IMemberTranslatorPlugin>>(this)
+            .OfType<NpgsqlJsonMemberTranslatorPlugin>()
+            .Single();
+
+    public NpgsqlJsonMemberTranslator GetTranslator()
+        => _translator ??= GetPlugin().Translators
+            .OfType<NpgsqlJsonMemberTranslator>()
+            .Single();
 
     public DbSet<TestModel> TestModels => Set<TestModel>();
 
