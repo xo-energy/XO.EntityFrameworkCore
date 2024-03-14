@@ -1,4 +1,6 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Infrastructure;
 using Microsoft.EntityFrameworkCore.Query;
@@ -70,7 +72,33 @@ public sealed class NpgsqlJsonSerializerOptionsExtension : IDbContextOptionsExte
     {
         private static readonly JsonSerializerOptions _debugOptions = new()
         {
-            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+            TypeInfoResolver = new DefaultJsonTypeInfoResolver()
+                .WithAddedModifier(static (info) =>
+                {
+                    if (info.Type != typeof(JsonSerializerOptions))
+                        return;
+
+                    var stringEnumConverter = new JsonStringEnumConverter();
+
+                    for (int i = info.Properties.Count - 1; i >= 0; i--)
+                    {
+                        var propertyType = info.Properties[i].PropertyType;
+
+                        switch (propertyType)
+                        {
+                            // don't serialize reference type properties except string
+                            case { IsValueType: false } when propertyType != typeof(string):
+                                info.Properties.RemoveAt(i);
+                                continue;
+
+                            // serialize enums as strings so they're readable
+                            case { IsEnum: true }:
+                                info.Properties[i].CustomConverter = stringEnumConverter;
+                                break;
+                        }
+                    }
+                }),
             WriteIndented = false,
         };
         private static readonly JsonSerializerOptions _debugOptionsIndented = new(_debugOptions)
