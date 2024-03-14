@@ -9,6 +9,7 @@
   <ItemGroup>
     <None Include="..\LICENSE.txt" Link="LICENSE.txt" Pack="true" PackagePath="/" />
     <None Include="README.md" Pack="true" PackagePath="/" />
+    <InternalsVisibleTo Include="XO.EntityFrameworkCore.Tests" />
   </ItemGroup>
 
   <ItemGroup>

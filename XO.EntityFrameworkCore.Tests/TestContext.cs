@@ -2,8 +2,10 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
+using Microsoft.EntityFrameworkCore.Query;
 using Npgsql;
+using XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions;
 
 namespace XO.EntityFrameworkCore;
 
@@ -13,6 +15,9 @@ internal sealed class TestContext : DbContext
 
     private static readonly DbDataSource _dataSource;
     private static int _nextId = 1;
+
+    private NpgsqlJsonMemberTranslatorPlugin? _plugin;
+    private NpgsqlJsonMemberTranslator? _translator;
 
     static TestContext()
     {
@@ -66,6 +71,17 @@ internal sealed class TestContext : DbContext
                 ;
         });
     }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "EF1001:Internal EF Core API usage.", Justification = "Test")]
+    public NpgsqlJsonMemberTranslatorPlugin GetPlugin()
+        => _plugin ??= InfrastructureExtensions.GetService<IEnumerable<IMemberTranslatorPlugin>>(this)
+            .OfType<NpgsqlJsonMemberTranslatorPlugin>()
+            .Single();
+
+    public NpgsqlJsonMemberTranslator GetTranslator()
+        => _translator ??= GetPlugin().Translators
+            .OfType<NpgsqlJsonMemberTranslator>()
+            .Single();
 
     public DbSet<TestModel> TestModels => Set<TestModel>();
 

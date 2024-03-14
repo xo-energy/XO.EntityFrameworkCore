@@ -43,6 +43,21 @@
         "resolved": "3.6.133",
         "contentHash": "VZWMd5YAeDxpjWjAP/X6bAxnRMiEf6tES/ITN0X5CHJgkWLLeHGmEALivmTAfYM6P+P/3Szy6VCITUAkqjcHVw=="
       },
+      "NSubstitute": {
+        "type": "Direct",
+        "requested": "[5.1.0, )",
+        "resolved": "5.1.0",
+        "contentHash": "ZCqOP3Kpp2ea7QcLyjMU4wzE+0wmrMN35PQMsdPOHYc2IrvjmusG9hICOiqiOTPKN0gJon6wyCn6ZuGHdNs9hQ==",
+        "dependencies": {
+          "Castle.Core": "5.1.1"
+        }
+      },
+      "NSubstitute.Analyzers.CSharp": {
+        "type": "Direct",
+        "requested": "[1.0.17, )",
+        "resolved": "1.0.17",
+        "contentHash": "Pwz0MD7CAM/G/fvJjM3ceOfI+S0IgjanHcK7evwyrW9qAWUG8fgiEXYfSX1/s3h2JUNDOw6ik0G8zp+RT61Y1g=="
+      },
       "xunit": {
         "type": "Direct",
         "requested": "[2.7.0, )",
@@ -59,6 +74,14 @@
         "requested": "[2.5.7, )",
         "resolved": "2.5.7",
         "contentHash": "31Rl7dBJriX0DNwZfDp8gqFOPsiM0c9kqpcH/HvNi9vDp+K7Ydf42H7mVIvYT918Ywzn1ymLg1c4DDC6iU754w=="
+      },
+      "Castle.Core": {
+        "type": "Transitive",
+        "resolved": "5.1.1",
+        "contentHash": "rpYtIczkzGpf+EkZgDr9CClTdemhsrwA/W5hMoPjLkRFnXzH44zDLoovXeKtmxb1ykXK9aJVODSpiJml8CTw2g==",
+        "dependencies": {
+          "System.Diagnostics.EventLog": "6.0.0"
+        }
       },
       "Microsoft.CodeCoverage": {
         "type": "Transitive",
@@ -265,6 +288,11 @@
         "dependencies": {
           "SQLitePCLRaw.core": "2.1.6"
         }
+      },
+      "System.Diagnostics.EventLog": {
+        "type": "Transitive",
+        "resolved": "6.0.0",
+        "contentHash": "lcyUiXTsETK2ALsZrX+nWuHSIQeazhqPphLfaRxzdGaG93+0kELqpgEHtwWOlQe7+jSFnKwaCAgL4kjeZCQJnw=="
       },
       "System.Memory": {
         "type": "Transitive",

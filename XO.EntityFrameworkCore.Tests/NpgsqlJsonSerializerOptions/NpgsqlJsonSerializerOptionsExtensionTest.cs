@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace XO.EntityFrameworkCore.NpgsqlJsonSerializerOptions;
 
@@ -107,5 +108,69 @@ public class NpgsqlJsonSerializerOptionsExtensionTest
         Assert.True(debugInfo.ContainsKey("NpgsqlJsonSerializerOptions:UseJsonSerializerValueComparer"));
         var valueComparer = debugInfo["NpgsqlJsonSerializerOptions:UseJsonSerializerValueComparer"];
         Assert.Equal(extension.UseJsonSerializerValueComparer.ToString(), valueComparer);
+    }
+
+    [Fact]
+    public void ShouldUseSameServiceProvider_ReturnsFalse_WhenOtherIsNotNpgsqlJsonSerializerOptionsExtension()
+    {
+        var extension = new NpgsqlJsonSerializerOptionsExtension();
+        var other = new CoreOptionsExtension();
+
+        var result = extension.Info.ShouldUseSameServiceProvider(other.Info);
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void ShouldUseSameServiceProvider_ReturnsFalse_WhenDefaultJsonSerializerOptionsAreDifferentInstances()
+    {
+        var extension = new NpgsqlJsonSerializerOptionsExtension()
+        {
+            DefaultJsonSerializerOptions = new JsonSerializerOptions(),
+        };
+        var other = new NpgsqlJsonSerializerOptionsExtension()
+        {
+            DefaultJsonSerializerOptions = new JsonSerializerOptions(),
+        };
+
+        var result = extension.Info.ShouldUseSameServiceProvider(other.Info);
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void ShouldUseSameServiceProvider_ReturnsFalse_WhenUseJsonSerializerValueComparerIsDifferent()
+    {
+        var extension = new NpgsqlJsonSerializerOptionsExtension()
+        {
+            UseJsonSerializerValueComparer = true,
+        };
+        var other = new NpgsqlJsonSerializerOptionsExtension()
+        {
+            UseJsonSerializerValueComparer = false,
+        };
+
+        var result = extension.Info.ShouldUseSameServiceProvider(other.Info);
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void ShouldUseSameServiceProvider_ReturnsTrue()
+    {
+        var extension = new NpgsqlJsonSerializerOptionsExtension()
+        {
+            DefaultJsonSerializerOptions = new JsonSerializerOptions(),
+            UseJsonSerializerValueComparer = true,
+        };
+        var other = new NpgsqlJsonSerializerOptionsExtension()
+        {
+            DefaultJsonSerializerOptions = extension.DefaultJsonSerializerOptions,
+            UseJsonSerializerValueComparer = extension.UseJsonSerializerValueComparer,
+        };
+
+        var result = extension.Info.ShouldUseSameServiceProvider(other.Info);
+
+        Assert.True(result);
     }
 }
